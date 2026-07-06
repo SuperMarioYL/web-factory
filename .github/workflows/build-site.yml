@@ -1,0 +1,120 @@
+# ============================================================
+# web-factory · reusable site build + GitHub Pages deploy
+# ------------------------------------------------------------
+# A caller repo drops `web/site.json` (+ optional `web/assets/`) and a
+# ~12-line caller workflow that does:
+#
+#   jobs:
+#     site:
+#       uses: SuperMarioYL/web-factory/.github/workflows/build-site.yml@v1
+#
+# This workflow renders that repo's site.json through the central
+# web-factory renderer and publishes the result to GitHub Pages.
+# The interface is stable at @v1 — inputs are optional with sane defaults.
+# ============================================================
+name: web-factory build-site
+
+on:
+  workflow_call:
+    inputs:
+      factory_ref:
+        description: 'web-factory ref/tag to build with (keep at v1 for the stable interface).'
+        type: string
+        required: false
+        default: 'v1'
+      web_dir:
+        description: 'Directory in the caller repo holding site.json (+ optional assets/).'
+        type: string
+        required: false
+        default: 'web'
+
+# GitHub Pages needs these permissions on the deploy job.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one concurrent Pages deploy per ref.
+concurrency:
+  group: 'pages-${{ github.ref }}'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. the CALLER repo (has web/site.json + optional web/assets)
+      - name: Checkout caller repo
+        uses: actions/checkout@v4
+        with:
+          path: caller
+
+      # 2. the central renderer
+      - name: Checkout web-factory
+        uses: actions/checkout@v4
+        with:
+          repository: SuperMarioYL/web-factory
+          ref: ${{ inputs.factory_ref }}
+          path: _factory
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: _factory/package-lock.json
+
+      # 3. fonttools + brotli for the CJK subset step
+      - name: Setup Python + fonttools
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install fonttools + brotli
+        run: pip install fonttools brotli
+
+      # 4. copy the caller's web/site.json (+ any assets) into the renderer
+      - name: Stage caller content
+        run: |
+          set -euo pipefail
+          WEB_DIR="caller/${{ inputs.web_dir }}"
+          if [ ! -f "$WEB_DIR/site.json" ]; then
+            echo "::error::Expected $WEB_DIR/site.json in the caller repo. See web-factory README."
+            exit 1
+          fi
+          cp "$WEB_DIR/site.json" _factory/site.json
+          # optional per-repo assets (extra fonts, images) → public/assets
+          if [ -d "$WEB_DIR/assets" ]; then
+            mkdir -p _factory/public/assets
+            cp -R "$WEB_DIR/assets/." _factory/public/assets/
+            echo "Copied caller assets → public/assets"
+          fi
+
+      - name: Install renderer deps
+        working-directory: _factory
+        run: npm ci
+
+      # 5. prebuild (inject config + subset CJK) + vite build → dist
+      - name: Build site
+        working-directory: _factory
+        env:
+          SITE_JSON: ./site.json
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _factory/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

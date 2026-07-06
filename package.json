@@ -1,0 +1,18 @@
+{
+  "name": "web-factory",
+  "version": "1.0.0",
+  "description": "Data-driven Vite + Three.js + GSAP renderer that builds any repo's Apple-style product site from a single site.json.",
+  "type": "module",
+  "scripts": {
+    "prebuild": "node scripts/prebuild.js",
+    "build": "node scripts/prebuild.js && vite build",
+    "dev": "node scripts/prebuild.js && vite",
+    "preview": "vite preview"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "three": "^0.185.1",
+    "vite": "^8.1.3"
+  }
+}

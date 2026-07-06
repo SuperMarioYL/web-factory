@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "quill",
+  "github": "https://github.com/example/quill",
+  "host": "quill.lei6393.com",
+  "lang": { "primary": "en", "toggle": false },
+  "accent": ["#f6a35c", "#ef5da8", "#7a5cff"],
+  "hero": {
+    "eyebrow": { "en": "Local-first · Markdown-native" },
+    "headline": {
+      "en": "Write once in plain Markdown\npublish anywhere in one keystroke"
+    },
+    "sub": {
+      "en": "Quill watches your notes folder, renders each file to a static page, and pushes the whole site to your host without a build config."
+    },
+    "command": "quill publish ./notes",
+    "cta": { "en": "Get started" },
+    "ctaGithub": { "en": "View on GitHub" },
+    "scroll": { "en": "Scroll for the advantages" }
+  },
+  "advantages": [
+    {
+      "title": { "en": "Plain Markdown in, static site out" },
+      "body": {
+        "en": "Point quill at any folder of .md files and it renders a fast static site — no front-matter ceremony, no framework to learn."
+      },
+      "chips": ["one folder", "zero config"]
+    },
+    {
+      "title": { "en": "Watch mode with instant preview" },
+      "body": {
+        "en": "Edit a note and quill re-renders that page in milliseconds, streaming the diff to an open preview tab over a local socket."
+      },
+      "chips": ["ms re-render", "live preview"]
+    },
+    {
+      "title": { "en": "One keystroke to publish" },
+      "body": {
+        "en": "quill publish diffs the built output against your host and uploads only what changed — atomic, resumable, no CI required."
+      },
+      "chips": ["incremental upload", "atomic swap"]
+    }
+  ],
+  "scene": {
+    "kind": "particle-field"
+  },
+  "cta": {
+    "headline": { "en": "From a notes folder to a live site in seconds" },
+    "sub": { "en": "Open source, MIT, no account, no paywall." },
+    "button": { "en": "Get started on GitHub" }
+  },
+  "footer": {
+    "tag": { "en": "The one-keystroke Markdown site publisher" }
+  }
+}
