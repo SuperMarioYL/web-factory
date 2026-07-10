@@ -47,19 +47,19 @@ export function createScene(canvas, opts = {}) {
   const coreGeo = new THREE.IcosahedronGeometry(2.05, 1);
   const coreWire = new THREE.LineSegments(
     new THREE.WireframeGeometry(coreGeo),
-    new THREE.LineBasicMaterial({ color: COL.blue, transparent: true, opacity: 0.55 })
+    new THREE.LineBasicMaterial({ color: COL.primary, transparent: true, opacity: 0.65 })
   );
   world.add(coreWire);
 
   const coreInner = new THREE.Mesh(
     new THREE.IcosahedronGeometry(1.5, 1),
-    new THREE.MeshBasicMaterial({ color: COL.violet, transparent: true, opacity: 0.14, wireframe: true })
+    new THREE.MeshBasicMaterial({ color: COL.deep, transparent: true, opacity: 0.16, wireframe: true })
   );
   world.add(coreInner);
 
   const glowTex = makeGlowTexture();
   const coreGlow = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map: glowTex, color: COL.blue, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false })
+    new THREE.SpriteMaterial({ map: glowTex, color: COL.primary, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false })
   );
   coreGlow.scale.set(5, 5, 1);
   world.add(coreGlow);
@@ -129,10 +129,10 @@ export function createScene(canvas, opts = {}) {
   const flow = new THREE.Points(flowGeo, flowMat);
   nodeGroup.add(flow);
 
-  // ---- bloom ----
+  // ---- bloom — restrained so it reads expensive, not neon ----
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.85, 0.62, 0.2);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.68, 0.6, 0.22);
   composer.addPass(bloom);
 
   let progress = 0;

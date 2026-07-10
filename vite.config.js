@@ -60,20 +60,16 @@ function htmlFromSite() {
   };
 }
 
-// small gradient monogram favicon derived from name + accent
+// small single-accent monogram favicon derived from name + accent[0]
 function faviconDataUri(name, accent) {
   const glyph = (name.trim()[0] || 'x').toLowerCase();
-  const [a, b, c] = accent;
+  const a = accent[0].replace('#', '%23');
   const svg =
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>` +
     `<rect width='64' height='64' rx='15' fill='%23090b13'/>` +
-    `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>` +
-    `<stop offset='0' stop-color='${a.replace('#', '%23')}'/>` +
-    `<stop offset='.5' stop-color='${b.replace('#', '%23')}'/>` +
-    `<stop offset='1' stop-color='${c.replace('#', '%23')}'/>` +
-    `</linearGradient></defs>` +
-    `<text x='32' y='45' font-family='-apple-system,SF Pro Display,system-ui,sans-serif' ` +
-    `font-size='40' font-weight='700' text-anchor='middle' fill='url(%23g)'>${glyph}</text></svg>`;
+    `<rect x='1' y='1' width='62' height='62' rx='14' fill='none' stroke='${a}' stroke-opacity='.35' stroke-width='2'/>` +
+    `<text x='32' y='45' font-family='-apple-system,Space Grotesk,system-ui,sans-serif' ` +
+    `font-size='40' font-weight='600' text-anchor='middle' fill='${a}'>${glyph}</text></svg>`;
   return `data:image/svg+xml,${svg}`;
 }
 

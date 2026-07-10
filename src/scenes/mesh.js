@@ -109,9 +109,10 @@ export function createScene(canvas, opts = {}) {
   glow.scale.set(7.5, 7.5, 1);
   world.add(glow);
 
+  // bloom — restrained so it reads expensive, not neon
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.55, 0.7, 0.35);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.4, 0.65, 0.4);
   composer.addPass(bloom);
 
   let progress = 0;

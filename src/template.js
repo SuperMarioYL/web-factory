@@ -15,8 +15,6 @@ const ghIcon = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
 
 const copyIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`;
 
-const chev = `<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
-
 const check = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px"><path d="M20 6L9 17l-5-5"/></svg>`;
 
 function esc(s) {
@@ -26,7 +24,9 @@ function esc(s) {
     .replace(/>/g, '&gt;');
 }
 
-// Advantage section — chips come from the config (already-formatted strings).
+// Advantage section — a true-glass card with a cursor spotlight border.
+// Cards alternate left/right down the page (zig-zag via CSS nth-of-type).
+// Chips come from the config (already-formatted strings).
 function advantage(n, adv) {
   const chips = (adv.chips || [])
     .map(
@@ -38,9 +38,8 @@ function advantage(n, adv) {
     .join('\n          ');
   return `
   <section class="advantage" data-adv="${n}">
-    <div class="wrap">
-      <div class="advantage-inner reveal">
-        <div class="adv-index"><span>${idxLabel()}</span> · <b>0${n}</b></div>
+    <div class="wrap adv-row">
+      <div class="adv-card reveal">
         <h2 data-i18n="adv.${n}.h"></h2>
         <p data-i18n="adv.${n}.p"></p>
         ${chips ? `<div class="adv-meta">\n          ${chips}\n        </div>` : ''}
@@ -49,18 +48,12 @@ function advantage(n, adv) {
   </section>`;
 }
 
-// small language-neutral index label (the toggle swaps nothing here —
-// it is decorative). Uses the primary lang word.
-function idxLabel() {
-  return SITE.lang.primary === 'en' ? 'Advantage' : '优势';
-}
-
-// The hero headline may contain "\n" → two lines, the 2nd gradient-tinted.
+// The hero headline may contain "\n" → two lines, the 2nd accent-tinted.
 function heroHeadline() {
   return `
         <h1>
           <span class="l1 reveal" data-i18n="hero.l1"></span>
-          <span class="l2 grad-text reveal" data-i18n="hero.l2"></span>
+          <span class="l2 reveal" data-i18n="hero.l2"></span>
         </h1>`;
 }
 
@@ -121,6 +114,7 @@ export function buildDOM() {
 
   return `
   <canvas id="bg-canvas"></canvas>
+  <div class="grain" aria-hidden="true"></div>
 
   <header class="topbar" id="topbar">
     <a class="wordmark" href="#top" aria-label="${esc(SITE.name)} home">${wordmark}</a>
@@ -146,11 +140,6 @@ export function buildDOM() {
           </a>
         </div>
       </div>
-
-      <a class="scroll-cue" href="#adv-1" aria-label="scroll down">
-        <span data-i18n="hero.scroll"></span>
-        ${chev}
-      </a>
     </section>
 
     <!-- SCROLLYTELLING ADVANTAGES -->

@@ -20,8 +20,10 @@ export class SiteConfigError extends Error {
   }
 }
 
-// ---- brand defaults (the mcpx violet/blue/cyan) ------------
-export const DEFAULT_ACCENT = ['#8b7cf6', '#4d9bff', '#34e5d0'];
+// ---- brand default: a single amber-phosphor accent ---------
+// accent[0] is THE accent (UI color). accent[1] / accent[2] only
+// tint the 3D scene; when absent they are derived from accent[0].
+export const DEFAULT_ACCENT = ['#e6a144'];
 export const KNOWN_SCENES = ['hub-nodes', 'particle-field', 'mesh'];
 const DEFAULT_SCENE = 'particle-field';
 
@@ -32,6 +34,66 @@ function fail(msg) {
     `[web-factory] Invalid site.json — ${msg}\n` +
       `  See the site.json contract in README.md. Required: name, github, hero.headline, ≥1 advantage.`
   );
+}
+
+// ---- tiny color helpers for deriving scene tints -----------
+function hexToRgb(hex) {
+  let h = hex.replace('#', '');
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  const n = parseInt(h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex([r, g, b]) {
+  const c = (v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+  return `#${c(r)}${c(g)}${c(b)}`;
+}
+
+function rgbToHsl([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return [h, s, l];
+}
+
+function hslToRgb([h, s, l]) {
+  if (s === 0) return [l * 255, l * 255, l * 255];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const f = (t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255];
+}
+
+// Derive two quiet scene tints from the single accent: a lighter,
+// slightly cooler sibling and a deeper ember of the same hue. These
+// only feed the WebGL scene — the page UI uses accent[0] alone.
+export function deriveSceneTints(accentHex) {
+  const [h, s, l] = rgbToHsl(hexToRgb(accentHex));
+  // both tints lean the SAME way around the wheel (slightly warmer /
+  // deeper) so additive blending in the scene never drifts toward a
+  // clashing neighbor hue
+  const lighter = rgbToHex(
+    hslToRgb([(h - 0.012 + 1) % 1, Math.max(0, s * 0.75), Math.min(0.88, l + 0.17)])
+  );
+  const deeper = rgbToHex(
+    hslToRgb([(h - 0.03 + 1) % 1, Math.min(1, s * 0.9), Math.max(0.12, l - 0.24)])
+  );
+  return [lighter, deeper];
 }
 
 // Accept either a bare string (applied to both langs) or a {zh,en} pair.
@@ -53,18 +115,24 @@ function normLangText(val, where, { required = false } = {}) {
 }
 
 function normAccent(accent) {
-  if (accent == null) return [...DEFAULT_ACCENT];
-  if (!Array.isArray(accent) || accent.length < 1) {
+  const src = accent == null ? [...DEFAULT_ACCENT] : accent;
+  if (!Array.isArray(src) || src.length < 1) {
     fail('accent must be an array of at least one hex color');
   }
-  const out = accent.map((c, i) => {
+  const out = src.map((c, i) => {
     if (typeof c !== 'string' || !HEX.test(c.trim())) {
-      fail(`accent[${i}] "${c}" is not a valid hex color (e.g. "#8b7cf6")`);
+      fail(`accent[${i}] "${c}" is not a valid hex color (e.g. "#e6a144")`);
     }
     return c.trim();
   });
-  // pad to 3 stops so the gradient always has a full run
-  while (out.length < 3) out.push(out[out.length - 1]);
+  // accent[0] is THE accent; pad missing scene tints by deriving quiet
+  // siblings of the same hue (backward compatible: an old 3-color array
+  // still builds — entries beyond [0] only tint the 3D scene).
+  if (out.length < 3) {
+    const [lighter, deeper] = deriveSceneTints(out[0]);
+    if (out.length === 1) out.push(lighter, deeper);
+    else out.push(deeper);
+  }
   return out.slice(0, 3);
 }
 
@@ -198,8 +266,8 @@ export function normalizeSiteConfig(raw, sourcePath = '<inline>') {
 
   // ---- derived SEO strings ----
   const seoTitle = {
-    zh: `${name} — ${firstLine(headline.zh)}`,
-    en: `${name} — ${firstLine(headline.en)}`,
+    zh: `${name} · ${firstLine(headline.zh)}`,
+    en: `${name} · ${firstLine(headline.en)}`,
   };
   const seoDesc = {
     zh: hero.sub.zh || firstLine(headline.zh),

@@ -82,10 +82,10 @@ export function createScene(canvas, opts = {}) {
   const dust = makeDust(900, COL.list, glowTex);
   world.add(dust);
 
-  // ---- bloom ----
+  // ---- bloom — restrained so it reads expensive, not neon ----
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.7, 0.7, 0.25);
+  const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.45, 0.65, 0.3);
   composer.addPass(bloom);
 
   let progress = 0;

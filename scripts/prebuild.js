@@ -157,6 +157,79 @@ function writeSeoFiles(cfg) {
   log(`SEO → public/robots.txt + public/sitemap.xml (origin: ${origin || '(none)'})`);
 }
 
+// Branded 404 — dark, one line, link home. Vite copies public/ into
+// dist/ verbatim, and GitHub Pages serves 404.html automatically.
+function write404(cfg) {
+  fs.mkdirSync(PUBLIC, { recursive: true });
+  const accent = cfg.accent[0];
+  const en = cfg.lang.primary === 'en';
+  const line = en ? 'This page does not exist.' : '这个页面不存在。';
+  const back = en ? `Back to ${cfg.name}` : `返回 ${cfg.name}`;
+  const html = `<!doctype html>
+<html lang="${en ? 'en' : 'zh-CN'}">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>404 · ${cfg.name}</title>
+<style>
+  @font-face {
+    font-family: "Space Grotesk";
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url("/fonts/space-grotesk-latin-var.woff2") format("woff2");
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #06070c;
+    color: #eceef5;
+    font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "PingFang SC", system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-image: radial-gradient(58% 50% at 70% 20%, ${accent}1f, transparent 62%);
+  }
+  main { padding: 2rem; }
+  .code {
+    font-size: clamp(4rem, 16vw, 9rem);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: ${accent};
+  }
+  p { margin-top: 1rem; color: #8d93a6; font-size: 1.05rem; }
+  a {
+    display: inline-block;
+    margin-top: 2rem;
+    color: #06070c;
+    background: ${accent};
+    font-weight: 600;
+    text-decoration: none;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  a:hover { transform: translateY(-2px); }
+  a:active { transform: scale(0.98); }
+  a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="code">404</div>
+  <p>${line}</p>
+  <a href="/">${back}</a>
+</main>
+</body>
+</html>
+`;
+  fs.writeFileSync(path.join(PUBLIC, '404.html'), html);
+  log('404 → public/404.html');
+}
+
 // ------------------------------------------------------------
 function main() {
   log(`SITE_JSON = ${SITE_JSON}`);
@@ -164,6 +237,7 @@ function main() {
   log(`building site for "${cfg.name}" → ${cfg.host || '(no host)'}`);
   writeRuntimeConfig(cfg);
   writeSeoFiles(cfg);
+  write404(cfg);
   subsetCjk(cfg);
   log('prebuild complete.');
 }

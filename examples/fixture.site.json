@@ -4,9 +4,9 @@
   "github": "https://github.com/example/quill",
   "host": "quill.lei6393.com",
   "lang": { "primary": "en", "toggle": false },
-  "accent": ["#f6a35c", "#ef5da8", "#7a5cff"],
+  "accent": ["#d97757"],
   "hero": {
-    "eyebrow": { "en": "Local-first · Markdown-native" },
+    "eyebrow": { "en": "Local-first, Markdown-native" },
     "headline": {
       "en": "Write once in plain Markdown\npublish anywhere in one keystroke"
     },
@@ -15,14 +15,13 @@
     },
     "command": "quill publish ./notes",
     "cta": { "en": "Get started" },
-    "ctaGithub": { "en": "View on GitHub" },
-    "scroll": { "en": "Scroll for the advantages" }
+    "ctaGithub": { "en": "View on GitHub" }
   },
   "advantages": [
     {
       "title": { "en": "Plain Markdown in, static site out" },
       "body": {
-        "en": "Point quill at any folder of .md files and it renders a fast static site — no front-matter ceremony, no framework to learn."
+        "en": "Point quill at any folder of .md files and it renders a fast static site. No front-matter ceremony, no framework to learn."
       },
       "chips": ["one folder", "zero config"]
     },
@@ -36,7 +35,7 @@
     {
       "title": { "en": "One keystroke to publish" },
       "body": {
-        "en": "quill publish diffs the built output against your host and uploads only what changed — atomic, resumable, no CI required."
+        "en": "quill publish diffs the built output against your host and uploads only what changed: atomic, resumable, no CI required."
       },
       "chips": ["incremental upload", "atomic swap"]
     }

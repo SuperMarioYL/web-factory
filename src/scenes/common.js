@@ -11,13 +11,20 @@
 
 import * as THREE from 'three';
 
+// accent[0] is THE accent (drives the scene's dominant color);
+// accent[1] / accent[2] are quiet scene tints (derived siblings of
+// the accent when the site.json gives only one color, or whatever an
+// older 3-color config provided — either way they only tint the 3D).
 export function accentColors(accent) {
-  const [violet, blue, cyan] = accent && accent.length ? accent : ['#8b7cf6', '#4d9bff', '#34e5d0'];
+  const src = accent && accent.length ? accent : ['#e6a144', '#f2cd8b', '#9c6420'];
+  const primary = new THREE.Color(src[0]);
+  const tint = new THREE.Color(src[1] || src[0]);
+  const deep = new THREE.Color(src[2] || src[0]);
   return {
-    violet: new THREE.Color(violet),
-    blue: new THREE.Color(blue),
-    cyan: new THREE.Color(cyan),
-    list: [new THREE.Color(violet), new THREE.Color(blue), new THREE.Color(cyan)],
+    primary,
+    tint,
+    deep,
+    list: [primary, tint, deep],
   };
 }
 
@@ -32,7 +39,9 @@ export function makeRenderer(canvas) {
   if (!renderer.getContext()) throw new Error('no-webgl');
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(DPR);
-  renderer.setClearColor(0x06070c, 1);
+  // transparent clear: the page's tinted ink shows through, so the
+  // canvas ground matches the CSS canvas on every color pipeline
+  renderer.setClearColor(0x06070c, 0);
   return renderer;
 }
 

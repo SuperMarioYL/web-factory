@@ -64,14 +64,15 @@ here — the renderer contains **no** hardcoded product strings.
   // ── OPTIONAL (sensible defaults) ──────────────────────────
   "host": "mcpx.lei6393.com",                       // → canonical, robots, sitemap
   "lang": { "primary": "zh", "toggle": true },      // default primary "zh", toggle true
-  "accent": ["#8b7cf6", "#4d9bff", "#34e5d0"],      // brand violet/blue/cyan default
+  "accent": ["#e6a144"],                            // accent[0] = THE page accent.
+                                                    // Extra entries (old 3-color arrays
+                                                    // still build) only tint the 3D scene.
   "hero": {
     "eyebrow":   { "zh": "…", "en": "…" },
     "sub":       { "zh": "…", "en": "…" },
     "command":   "mcpx add filesystem",             // omit → command pill hidden
     "cta":       { "zh": "开始使用", "en": "Get started" },
-    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" },
-    "scroll":    { "zh": "下拉了解更多", "en": "Scroll to explore" }
+    "ctaGithub": { "zh": "在 GitHub 查看", "en": "View on GitHub" }
   },
   "scene": {
     "kind": "hub-nodes",                            // scene library, see below
@@ -95,10 +96,11 @@ states.
 |-------|---------|
 | `lang.primary` | `"zh"` |
 | `lang.toggle` | `true` |
-| `accent` | `["#8b7cf6", "#4d9bff", "#34e5d0"]` (brand violet/blue/cyan) |
+| `accent` | `["#e6a144"]` (amber phosphor). `accent[0]` is the one page accent; entries `[1]`/`[2]` are optional and only tint the 3D scene (derived from `accent[0]` when absent). Old 3-color arrays keep building — `[0]` becomes the accent, the rest feed the scene. |
 | `hero.command` | absent → the command pill is hidden |
 | `scene.kind` | `"particle-field"` if unspecified or unknown |
-| `hero.cta` / `ctaGithub` / `scroll`, `cta.*`, `footer.tag` | reasonable bilingual defaults |
+| `hero.cta` / `ctaGithub`, `cta.*`, `footer.tag` | reasonable bilingual defaults |
+| `hero.scroll` | still accepted for back-compat, no longer rendered (the scroll cue was retired) |
 
 ### Fail-loud rules
 
@@ -109,7 +111,7 @@ is missing or malformed:
 - `github` — `https://github.com/OWNER/REPO`
 - `hero.headline` — non-empty (either language)
 - `advantages` — non-empty array (≥ 1), each with `title` + `body`
-- `accent[i]` — valid hex (`#8b7cf6` or `#abc`)
+- `accent[i]` — valid hex (`#e6a144` or `#abc`)
 
 An **unknown `scene.kind`** is *not* fatal — it warns and falls back to
 `particle-field`, so a typo never breaks a build.
@@ -169,8 +171,8 @@ site.json ──► scripts/prebuild.js ──► src/site.generated.js   (runti
 
 ### Fonts
 
-- **Inter** (weights 400/500/600/700) is vendored under `public/fonts/` and
-  always shipped for Latin text.
+- **Space Grotesk** (a single variable woff2, `wght` 300-700, Latin subset,
+  OFL) is vendored under `public/fonts/` and always shipped for Latin text.
 - **Noto Sans SC** for CJK is **not** vendored (the full font is ~17 MB).
   Instead the prebuild collects the exact CJK glyphs used in `site.json` and
   runs `pyftsubset` on a source Noto Sans SC **variable** TTF to a tiny
@@ -221,7 +223,7 @@ web-factory/
 │     ├─ hub-nodes.js         # central hub → N nodes (generalized mcpx hero)
 │     ├─ particle-field.js    # universal flowing particle cloud (fallback)
 │     └─ mesh.js              # abstract flowing gradient blob
-├─ public/fonts/inter-latin-*.woff2   # vendored Inter (Latin base)
+├─ public/fonts/space-grotesk-latin-var.woff2   # vendored Space Grotesk (Latin base)
 ├─ examples/
 │  ├─ mcpx.site.json          # the reference mcpx content
 │  └─ pages.yml               # the ~12-line caller
