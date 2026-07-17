@@ -33,7 +33,16 @@ function splitHeadline(text) {
   return { l1: parts[0] || '', l2: parts.slice(1).join(' ') || '' };
 }
 
-let lang = SITE.lang.primary === 'en' ? 'en' : 'zh';
+// Locale by visitor timezone: UTC+8 (Shanghai/Taipei/HK/Singapore/…) → zh, else en.
+// The manual .lang-toggle still lets either audience switch; SITE.lang.primary is
+// the fallback if the timezone can't be read.
+function pickLang() {
+  try {
+    if (new Date().getTimezoneOffset() === -480) return 'zh'; // UTC+8
+  } catch (e) {}
+  return SITE.lang.primary === 'en' ? 'en' : 'zh';
+}
+let lang = pickLang();
 
 function applyLang(l) {
   lang = l;
