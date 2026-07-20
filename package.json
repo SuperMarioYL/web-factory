@@ -9,7 +9,7 @@
     "dev": "node scripts/prebuild.js && vite",
     "preview": "vite preview"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "gsap": "^3.15.0",
     "three": "^0.185.1",
